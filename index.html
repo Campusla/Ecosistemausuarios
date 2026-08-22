@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CampusLA - Registro y Acceso Local</title>
+    <title>CampusLA - Registro y Acceso</title>
     <style>
         body { font-family: Helvetica, Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 40px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
         .main-container { display: flex; flex-wrap: wrap; gap: 40px; max-width: 900px; background: #fff; padding: 40px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); align-items: center; }
@@ -32,12 +32,18 @@
 
         <div class="form-side">
             <h3>¡Regístrate Ahora!</h3>
-            <form id="regForm">
+            <!-- Apuntando a FormSubmit con tu correo oficial -->
+            <form id="regForm" action="https://formsubmit.co/eatramites1@gmail.com" method="POST">
+                <!-- Configuraciones extra para FormSubmit (Opcional pero útil) -->
+                <input type="hidden" name="_subject" value="¡Nuevo Registro en CampusLA!">
+                <input type="hidden" name="_template" value="table">
+                <input type="hidden" name="_captcha" value="false">
+
                 <div class="input-group">
-                    <input type="text" id="nombre" placeholder="Nombre completo" required>
-                    <input type="email" id="email" placeholder="Correo electrónico" required>
-                    <input type="tel" id="telefono" placeholder="Teléfono" required>
-                    <input type="password" id="clave" placeholder="Contraseña" required>
+                    <input type="text" name="nombre" id="nombre" placeholder="Nombre completo" required>
+                    <input type="email" name="email" id="email" placeholder="Correo electrónico" required>
+                    <input type="tel" name="telefono" id="telefono" placeholder="Teléfono" required>
+                    <input type="password" name="clave" id="clave" placeholder="Contraseña" required>
                     
                     <div class="terms-box">
                         <label>
@@ -54,59 +60,29 @@
         </div>
     </div>
 
-    <!-- SDK de Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        (function() {
-            const SUPABASE_URL = "https://oelpyytzgveotnnwjvlv.supabase.co";
-            const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lbHB5eXR6Z3Zlb3Rubndqdmx2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5NTk5ODQsImV4cCI6MjA4NDUzNTk4NH0.D3JBXIejWnjTucGEKGZYP6PK0oLSnXFl2ctr2g75t_Q";
-            
-            const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            const form = document.getElementById('regForm');
+        document.getElementById('regForm').addEventListener('submit', function(e) {
             const btn = document.getElementById('main-register-btn');
+            btn.innerText = 'CONFIGURANDO TU PERFIL...';
+            btn.disabled = true;
 
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                btn.innerText = 'CONFIGURANDO TU PERFIL...';
-                btn.disabled = true;
+            const nombreVal = document.getElementById('nombre').value;
+            const emailVal = document.getElementById('email').value;
+            const telefonoVal = document.getElementById('telefono').value;
 
-                const nombreVal = document.getElementById('nombre').value;
-                const emailVal = document.getElementById('email').value;
-                const telefonoVal = document.getElementById('telefono').value;
-                const claveVal = document.getElementById('clave').value;
+            // Creamos la sesión local para que la consola abra de inmediato con sus datos
+            const userSession = {
+                nombre: nombreVal,
+                email: emailVal,
+                telefono: telefonoVal,
+                fechaRegistro: new Date().toISOString()
+            };
+            
+            localStorage.setItem('cla_user_session', JSON.stringify(userSession));
 
-                const payload = {
-                    nombre: nombreVal,
-                    email: emailVal,
-                    telefono: telefonoVal,
-                    clave: claveVal
-                };
-
-                try {
-                    // 1. Guardar en Supabase (Tabla contactos)
-                    const { error } = await _supabase.from('contactos').insert([payload]);
-                    if (error) throw error;
-
-                    // 2. Crear sesión local de usuario
-                    const userSession = {
-                        nombre: nombreVal,
-                        email: emailVal,
-                        telefono: telefonoVal,
-                        fechaRegistro: new Date().toISOString()
-                    };
-                    localStorage.setItem('cla_user_session', JSON.stringify(userSession));
-
-                    // 3. Redirigir al panel de perfil personal
-                    window.location.href = 'perfil.html';
-
-                } catch (err) {
-                    console.error("Error completo:", err);
-                    alert('Error: ' + err.message);
-                    btn.innerText = 'Registrarse Ahora';
-                    btn.disabled = false;
-                }
-            });
-        })();
+            // El formulario se envía a FormSubmit (llegará a eatramites1@gmail.com) 
+            // y permitimos que el navegador continúe con el flujo de redirección natural o lo mandamos al perfil.
+        });
     </script>
 </body>
 </html>
