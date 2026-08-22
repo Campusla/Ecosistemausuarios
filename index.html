@@ -32,9 +32,8 @@
 
         <div class="form-side">
             <h3>¡Regístrate Ahora!</h3>
-            <!-- Apuntando a FormSubmit con tu correo oficial -->
-            <form id="regForm" action="https://formsubmit.co/eatramites1@gmail.com" method="POST">
-                <!-- Configuraciones extra para FormSubmit (Opcional pero útil) -->
+            <form id="regForm">
+                <!-- Parámetros ocultos para FormSubmit en segundo plano -->
                 <input type="hidden" name="_subject" value="¡Nuevo Registro en CampusLA!">
                 <input type="hidden" name="_template" value="table">
                 <input type="hidden" name="_captcha" value="false">
@@ -62,6 +61,8 @@
 
     <script>
         document.getElementById('regForm').addEventListener('submit', function(e) {
+            e.preventDefault(); // Evita que la página se congele o recargue
+
             const btn = document.getElementById('main-register-btn');
             btn.innerText = 'CONFIGURANDO TU PERFIL...';
             btn.disabled = true;
@@ -70,18 +71,28 @@
             const emailVal = document.getElementById('email').value;
             const telefonoVal = document.getElementById('telefono').value;
 
-            // Creamos la sesión local para que la consola abra de inmediato con sus datos
+            // 1. Guardamos la sesión local para que la consola abra de inmediato
             const userSession = {
                 nombre: nombreVal,
                 email: emailVal,
                 telefono: telefonoVal,
                 fechaRegistro: new Date().toISOString()
             };
-            
             localStorage.setItem('cla_user_session', JSON.stringify(userSession));
 
-            // El formulario se envía a FormSubmit (llegará a eatramites1@gmail.com) 
-            // y permitimos que el navegador continúe con el flujo de redirección natural o lo mandamos al perfil.
+            // 2. Enviamos el correo a FormSubmit de manera silenciosa (hacia eatramites1@gmail.com)
+            const formData = new FormData(this);
+            fetch("https://formsubmit.co/ajax/eatramites1@gmail.com", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .catch(error => console.log('Notificación enviada a fondo:', error));
+
+            // 3. Redirigimos al perfil personal de inmediato
+            setTimeout(() => {
+                window.location.href = 'perfilpersonal.html';
+            }, 600);
         });
     </script>
 </body>
